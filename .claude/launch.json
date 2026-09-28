@@ -1,0 +1,23 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "sanity-studio",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--prefix", "studio"],
+      "port": 3333
+    },
+    {
+      "name": "concierge-site",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", "-l", "8080", "."],
+      "port": 8080
+    },
+    {
+      "name": "concierge-site-functions",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["--no-install", "netlify", "dev", "-p", "8888"],
+      "port": 8888
+    }
+  ]
+}
