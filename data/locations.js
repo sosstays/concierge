@@ -197,8 +197,9 @@ async function loadSanityData() {
     pubs: (doc.mealIntros && doc.mealIntros.pubs) || 'Here you go:',
   };
 
+  const wifi = property.essentials.wifi || {};
   stayInfo = {
-    wifi: `Network: <b>${property.essentials.wifi.network}</b> &middot; Password: <b>${property.essentials.wifi.password}</b>`,
+    wifi: `Network: <b>${wifi.network || 'Not set'}</b> &middot; Password: <b>${wifi.password || 'Not set'}</b>`,
     checkinout: property.essentials.checkInOut,
     parking: property.essentials.parking,
     contact: `Your host is real and local. <a href="tel:${property.hostPhone}">Call</a> or <a href="sms:${property.hostPhone}">message</a> anytime.`,
