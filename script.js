@@ -12,7 +12,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // here is safe even though it's declared further down: this catch handler
   // only ever runs asynchronously, after the whole synchronous function body
   // (and its const declarations) has already executed.
-  const dataReadyPromise = loadSanityData().catch((err) => {
+  const dataReadyPromise = loadSanityData().then(() => {
+    applyLogo();
+  }).catch((err) => {
     console.error('Failed to load property data from Sanity', err);
     gateOverlay.innerHTML = '<div class="sos-gate-card"><p>Sorry, we couldn\'t load this property right now. Please refresh the page or try again shortly.</p></div>';
     throw err;
@@ -24,6 +26,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (property.pageTitle) {
       document.title = property.pageTitle;
     }
+    applyLogo();
+  }
+
+  function applyLogo() {
     if (property.logoUrl) {
       document.querySelectorAll('.sos-gate-card .sos-logo, .sos-topbar .sos-logo').forEach((img) => {
         img.src = property.logoUrl;

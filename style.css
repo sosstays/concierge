@@ -72,6 +72,10 @@ button { font-family: inherit; }
   height: auto;
 }
 
+.sos-logo:not([src]) {
+  visibility: hidden;
+}
+
 .sos-gate-card .sos-logo {
   max-height: 120px;
   margin: 0 auto 20px;
