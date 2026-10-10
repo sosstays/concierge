@@ -475,8 +475,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  async function enterApp() {
+  async function enterApp(guest) {
     await dataReadyPromise;
+    if (guest) recordConciergeSignup(guest.name, guest.email, guest.marketingConsent, guest.bookingId);
     applyPropertyMeta();
     gateOverlay.classList.add('sos-hidden');
     appRoot.classList.remove('sos-hidden');
@@ -539,6 +540,27 @@ document.addEventListener('DOMContentLoaded', () => {
       });
   }
 
+  // ---------- Record every gate sign-in in Supabase (with or without a booking) so it shows in the admin dashboard ----------
+  const CONCIERGE_SIGNUP_URL = 'https://xqqkofbpqntdtfrvxdzo.supabase.co/functions/v1/concierge-signup';
+
+  function recordConciergeSignup(name, email, marketingConsent, bookingId) {
+    if (!email) return;
+    fetch(CONCIERGE_SIGNUP_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name,
+        email,
+        marketingConsent,
+        bookingId,
+        siteHost: window.location.hostname,
+        propertyName: property && property.name,
+      }),
+    }).catch(() => {
+      // Don't block the guest experience if the Supabase write fails.
+    });
+  }
+
   gateForm.addEventListener('submit', (e) => {
     e.preventDefault();
     const validName = validateName();
@@ -559,7 +581,7 @@ document.addEventListener('DOMContentLoaded', () => {
     submitToNetlify(validName, validEmail, marketingConsent, bookingId);
     submitToMailerLite(validName, validEmail, marketingConsent, bookingId);
     linkBookingInSupabase(validName, validEmail, bookingId);
-    enterApp();
+    enterApp({ name: validName, email: validEmail, marketingConsent, bookingId });
   });
 
   // ---------- Init: skip the gate entirely if we already know this guest ----------
@@ -571,6 +593,11 @@ document.addEventListener('DOMContentLoaded', () => {
     saveGuest(savedGuest.name, savedGuest.email, savedGuest.marketingConsent, bookingId || savedGuest.bookingId);
     // Only re-link Supabase when this visit actually carried a fresh URL booking id.
     if (urlBookingId) linkBookingInSupabase(savedGuest.name, savedGuest.email, urlBookingId);
-    enterApp();
+    enterApp({
+      name: savedGuest.name,
+      email: savedGuest.email,
+      marketingConsent: savedGuest.marketingConsent,
+      bookingId: bookingId || savedGuest.bookingId,
+    });
   }
 });
