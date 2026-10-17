@@ -5,6 +5,7 @@
 //   MAILERLITE_API_KEY   — MailerLite API token
 // Optional:
 //   MAILERLITE_GROUP_ID  — MailerLite group/list ID to add the subscriber to
+//                          (the shared "Concierge" group: 201598333074016062)
 //
 // Note: the "booking_id" custom field must exist in your MailerLite account
 // (Subscribers → Custom fields) before it'll actually be stored on the record.
@@ -21,7 +22,7 @@ exports.handler = async (event) => {
     return { statusCode: 400, body: JSON.stringify({ error: 'Invalid JSON' }) };
   }
 
-  const { name, email, marketingConsent, bookingId } = data;
+  const { name, email, marketingConsent, bookingId, propertyName } = data;
 
   // Respect consent — only subscribe guests who ticked the marketing checkbox.
   if (!marketingConsent) {
@@ -40,7 +41,8 @@ exports.handler = async (event) => {
 
   const payload = {
     email,
-    fields: { name: name || '', booking_id: bookingId || '' },
+    // `property` is a MailerLite custom field (Subscribers -> Fields) so guests can be segmented by property.
+    fields: { name: name || '', booking_id: bookingId || '', property: propertyName || '' },
   };
   if (process.env.MAILERLITE_GROUP_ID) {
     payload.groups = [process.env.MAILERLITE_GROUP_ID];

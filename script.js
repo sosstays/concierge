@@ -491,23 +491,23 @@ document.addEventListener('DOMContentLoaded', () => {
       .join('&');
   }
 
-  function submitToNetlify(name, email, marketingConsent, bookingId) {
+  function submitToNetlify(name, email, marketingConsent, bookingId, propertyName) {
     fetch('/', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: encodeFormData({ 'form-name': 'gate-form', name, email, marketing: marketingConsent ? 'yes' : 'no', booking: bookingId || '' }),
+      body: encodeFormData({ 'form-name': 'gate-form', name, email, marketing: marketingConsent ? 'yes' : 'no', booking: bookingId || '', property: propertyName || '' }),
     }).catch(() => {
       // Don't block the guest experience if the Netlify submission fails.
     });
   }
 
   // ---------- Subscribe to MailerLite via a Netlify Function (keeps the API key server-side) ----------
-  function submitToMailerLite(name, email, marketingConsent, bookingId) {
+  function submitToMailerLite(name, email, marketingConsent, bookingId, propertyName) {
     if (!marketingConsent) return;
     fetch('/.netlify/functions/subscribe', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, email, marketingConsent, bookingId }),
+      body: JSON.stringify({ name, email, marketingConsent, bookingId, propertyName }),
     }).catch(() => {
       // Don't block the guest experience if the MailerLite submission fails.
     });
@@ -578,8 +578,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     guestName = validName.split(' ')[0];
     saveGuest(validName, validEmail, marketingConsent, bookingId);
-    submitToNetlify(validName, validEmail, marketingConsent, bookingId);
-    submitToMailerLite(validName, validEmail, marketingConsent, bookingId);
+    // Wait for the Sanity data (already loading) so the property name is known;
+    // send anyway, with a blank name, if it failed to load.
+    dataReadyPromise.catch(() => {}).then(() => {
+      const propertyName = (property && property.name) || '';
+      submitToNetlify(validName, validEmail, marketingConsent, bookingId, propertyName);
+      submitToMailerLite(validName, validEmail, marketingConsent, bookingId, propertyName);
+    });
     linkBookingInSupabase(validName, validEmail, bookingId);
     enterApp({ name: validName, email: validEmail, marketingConsent, bookingId });
   });
