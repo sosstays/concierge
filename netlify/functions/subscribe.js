@@ -1,4 +1,4 @@
-// Netlify Function: adds a guest to MailerLite when they opt in to marketing.
+// Netlify Function: adds every guest who submits the gate form to MailerLite.
 // Runs server-side so the MailerLite API key never reaches the browser.
 //
 // Required environment variable (set in Netlify site settings):
@@ -22,12 +22,7 @@ exports.handler = async (event) => {
     return { statusCode: 400, body: JSON.stringify({ error: 'Invalid JSON' }) };
   }
 
-  const { name, email, marketingConsent, bookingId, propertyName } = data;
-
-  // Respect consent — only subscribe guests who ticked the marketing checkbox.
-  if (!marketingConsent) {
-    return { statusCode: 200, body: JSON.stringify({ skipped: true }) };
-  }
+  const { name, email, bookingId, propertyName } = data;
 
   if (!email) {
     return { statusCode: 400, body: JSON.stringify({ error: 'Missing email' }) };

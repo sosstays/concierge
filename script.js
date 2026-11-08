@@ -503,7 +503,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ---------- Subscribe to MailerLite via a Netlify Function (keeps the API key server-side) ----------
   function submitToMailerLite(name, email, marketingConsent, bookingId, propertyName) {
-    if (!marketingConsent) return;
     fetch('/.netlify/functions/subscribe', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
